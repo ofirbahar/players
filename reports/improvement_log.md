@@ -48,3 +48,15 @@ drawdown deepened (−7.8% → −10.0%). Many additions move with assets alread
 
 Compares the account's live results with the backtest's expectations and flags drift. Rule: when
 live results fall outside the normal range, cut size or stop; don't re-tune on the same data.
+
+## 2026-11-13 · First live day and two bug fixes
+
+Day bot, 1:58–3:56pm ET: 21 orders, 47 fills, **+$65.26** (AMD +$83, TSLA +$11, AAPL −$24). One afternoon
+says nothing about skill. Bugs found from the live run:
+
+- The bot counted P&L from its own order records and missed a partial fill, so it reported −$1,006.70.
+  Both the bot and the scorecard now use Alpaca's fill records.
+- It re-sized open positions whenever the share count implied by $5,000 changed with the price,
+  which caused 1-share AAPL trades that only paid spread. It now holds a position until the signal changes.
+
+Swing portfolio rebalanced into `blend_all_scaled` at 3:57pm ET.

@@ -71,10 +71,10 @@ def today_bars(symbols):
 
 
 class Book:
-    """Tracks the bot's own cash flows so its P&L excludes the rest of the account."""
+    """The bot's own P&L, computed from Alpaca's fill records (the source of truth, including partial fills)."""
 
-    def __init__(self):
-        self.cash = 0.0
+    def __init__(self, symbols, since_utc):
+        self.symbols, self.since = set(symbols), since_utc
 
     def fill(self, order_id, timeout=20):
         for _ in range(timeout):
@@ -82,13 +82,15 @@ class Book:
             if o["status"] in ("filled", "canceled", "rejected", "expired"):
                 break
             time.sleep(1)
-        qty = float(o.get("filled_qty") or 0)
-        px = float(o.get("filled_avg_price") or 0)
-        self.cash += (-1 if o["side"] == "buy" else 1) * qty * px
-        return o["status"], qty, px
+        return o["status"], float(o.get("filled_qty") or 0), float(o.get("filled_avg_price") or 0)
 
     def pnl(self, positions):
-        return self.cash + sum(float(p["market_value"]) for p in positions.values())
+        cash = 0.0
+        day = self.since[:10]
+        for f in api("GET", "/account/activities/FILL", params={"date": day, "page_size": 100}):
+            if f["symbol"] in self.symbols and f["transaction_time"] >= self.since:
+                cash += (-1 if f["side"] == "buy" else 1) * float(f["qty"]) * float(f["price"])
+        return cash + sum(float(p["market_value"]) for p in positions.values())
 
 
 def positions_for(symbols):
@@ -108,6 +110,8 @@ def submit(symbol, side, qty, book, dry):
 
 
 def set_position(symbol, target, price, current_qty, size, book, dry):
+    if current_qty != 0 and target != 0 and (target > 0) == (current_qty > 0):
+        return          # already positioned in the right direction: don't churn on price-driven resizing
     want = int(target) * math.floor(size / price)
     if want == current_qty:
         return
@@ -136,7 +140,7 @@ def main():
 
     swing = set(json.loads((config.ROOT / "reports" / "chosen_strategy.json").read_text())["universe"])
     symbols = [s for s in intraday.SYMBOLS if s not in swing]   # never trade the swing portfolio's symbols
-    book = Book()
+    book = Book(symbols, datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S"))
     start_pos = positions_for(symbols)
     if start_pos:
         raise SystemExit(f"Bot symbols already have positions: {list(start_pos)}. Close them first.")

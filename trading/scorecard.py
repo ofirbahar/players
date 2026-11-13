@@ -29,6 +29,7 @@ def account_history():
 
 
 def daybot_days():
+    """Per-day bot P&L from Alpaca's fill records between the bot's start and stop (the source of truth)."""
     path = REPORTS / "daybot_log.jsonl"
     if not path.exists():
         return pd.DataFrame()
@@ -36,12 +37,23 @@ def daybot_days():
     out = {}
     for r in rows:
         day = r["time"][:10]
-        o = out.setdefault(day, {"orders": 0, "pnl": 0.0})
-        if r["event"] == "order":
+        o = out.setdefault(day, {"orders": 0, "start": None, "stop": None, "symbols": []})
+        if r["event"] == "start":
+            o["start"], o["symbols"] = r["time"][:19], r["symbols"]
+        elif r["event"] in ("stop", "flatten"):
+            o["stop"] = r["time"][:19]
+        elif r["event"] == "order":
             o["orders"] += 1
-        if r["event"] in ("tick", "stop"):
-            o["pnl"] = r["pnl"]
-    return pd.DataFrame(out).T
+    result = {}
+    for day, o in out.items():
+        if not o["start"]:
+            continue
+        stop = o["stop"] or "9999"
+        fills = api("GET", "/account/activities/FILL", params={"date": day, "page_size": 100})
+        cash = sum((-1 if f["side"] == "buy" else 1) * float(f["qty"]) * float(f["price"])
+                   for f in fills if f["symbol"] in o["symbols"] and o["start"] <= f["transaction_time"][:19] <= stop)
+        result[day] = {"orders": o["orders"], "pnl": cash if o["stop"] else float("nan")}
+    return pd.DataFrame(result).T
 
 
 def main():
