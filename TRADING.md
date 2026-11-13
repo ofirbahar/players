@@ -54,3 +54,22 @@ It refuses to run against a non-paper endpoint unless `--allow-live` is passed. 
 - Backtests are not forecasts. Five years in-sample and ~5 out-of-sample is short; results depend on the universe.
 - Testing many strategies inflates the best in-sample result; the out-of-sample table is the honest one.
 - Costs are modelled simply (no slippage beyond 5 bps, no taxes, no borrow costs).
+
+## 4. Day trading: `python -m trading.intraday` and `python -m trading.daybot`
+
+`trading.intraday` backtests minute-level strategies on 8 liquid names (QQQ, AAPL, MSFT, NVDA, AMZN,
+META, TSLA, AMD) over six months: trading every minute, opening-range breakout, VWAP reversion,
+EMA momentum, RSI reversion, and an adaptive switcher that picks trend-following or reversion
+from the market's efficiency ratio. Results (May–Nov 2026, 2 bps per side for spread and slippage):
+
+- Trading every minute lost about 99%: ~400 round trips a day per stock, each paying the spread.
+- Every strategy lost money after costs, in both the first 60% of days and the last 40%.
+- Only VWAP reversion was profitable before costs in both periods (~4 bps a day).
+- The adaptive switcher was worst of the rest: switching regimes adds trades, and trades cost money.
+
+`trading.daybot` trades the strictest VWAP-reversion setting live on the paper account: every
+minute it checks for a move 3.5 standard deviations away from VWAP (after 10:30am) and fades it,
+exiting near VWAP. $5,000 per stock, integer shares (so it can short), a $750 daily loss stop,
+flat by 15:55 ET, paper endpoint only. Expect it to lose a little on average: it exists to watch
+live behaviour, not because it has a proven edge. Logs go to `reports/daybot_log.jsonl`.
+It must run on a machine that stays on through the trading day.
