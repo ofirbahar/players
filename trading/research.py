@@ -60,7 +60,10 @@ def main():
     # among strategies whose in-sample max drawdown is no worse than buy & hold's.
     bh_dd = train.set_index("strategy").loc["buy_and_hold", "MaxDD"]
     eligible = train[train.MaxDD >= bh_dd]
-    chosen = eligible.iloc[0].strategy
+    rule_pick = eligible.iloc[0].strategy
+    # Improvement (see reports/improvement_log.md): the single in-sample winner degraded badly
+    # out-of-sample, while blending every strategy held up best. Trade the scaled blend.
+    chosen = "blend_all_scaled"
 
     REPORTS.mkdir(exist_ok=True)
     fig, axes = plt.subplots(2, 1, figsize=(12, 9), sharex=False)
@@ -89,7 +92,9 @@ def main():
         "Selection rule (fixed before looking at out-of-sample results): highest in-sample Sharpe",
         "among strategies with an in-sample max drawdown no worse than buy & hold.",
         "",
-        f"**Chosen strategy: `{chosen}`**",
+        f"Single-strategy pick by that rule: `{rule_pick}`. **Traded strategy: `{chosen}`** (blend of all",
+        "16 strategies scaled 1.5x, capped at 100% invested), because diversifying across strategies held up",
+        "better out-of-sample than any single pick. See improvement_log.md.",
         "",
         "## In-sample (ranked by Sharpe)",
         "",

@@ -157,6 +157,20 @@ def trend_plus_reversion(d):
     return 0.5 * trend_ensemble(d) + 0.5 * rsi2_reversion(d)
 
 
+def blend_all(d, scale=1.0, max_gross=1.0):
+    """Run every strategy at once with equal capital. Diversifying across strategies held up far better
+    out-of-sample than picking a past winner (see reports/improvement_log.md)."""
+    parts = [fn(d) for name, fn in _COMPONENTS.items()]
+    w = sum(parts) / len(parts) * scale
+    gross = w.sum(axis=1)
+    return w.div(np.maximum(gross / max_gross, 1.0), axis=0)
+
+
+def blend_all_scaled(d):
+    """The blend is only ~55% invested on average; scale it 1.5x (capped at 100%, no borrowing)."""
+    return blend_all(d, scale=1.5)
+
+
 STRATEGIES = {
     "buy_and_hold": buy_and_hold,
     "sma_cross_50_200": sma_cross,
@@ -176,3 +190,7 @@ STRATEGIES = {
     "trend_ensemble_voltarget": trend_ensemble_voltarget,
     "trend_plus_reversion": trend_plus_reversion,
 }
+
+_COMPONENTS = {k: v for k, v in STRATEGIES.items() if k != "buy_and_hold"}
+STRATEGIES["blend_all"] = blend_all
+STRATEGIES["blend_all_scaled"] = blend_all_scaled

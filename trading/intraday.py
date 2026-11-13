@@ -73,6 +73,7 @@ def features(df):
         d["rsi"] = 100 - 100 / (1 + up / dn.replace(0, np.nan))
         n = 30
         d["er"] = (d["close"] - d["close"].shift(n)).abs() / delta.abs().rolling(n).sum()
+        d["day_er"] = (d["close"] - d["open"].iloc[0]).abs() / delta.abs().cumsum().replace(0, np.nan)
         first30 = d.iloc[:30]
         d["or_high"], d["or_low"] = first30["high"].max(), first30["low"].min()
         d["minute"] = np.arange(len(d))

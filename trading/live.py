@@ -37,13 +37,14 @@ def target_weights(strategy, universe):
     return w[w > 1e-6], d["close"].index[-1].date()
 
 
-def plan_orders(weights, max_gross=1.0, min_trade_frac=0.005):
+def plan_orders(weights, universe, max_gross=1.0, min_trade_frac=0.005):
     acct = api("GET", "/account")
     equity = float(acct["equity"])
     gross = weights.sum()
     if gross > max_gross:
         weights = weights * max_gross / gross
-    positions = {p["symbol"]: float(p["market_value"]) for p in api("GET", "/positions")}
+    # only the swing universe: positions in other symbols (e.g. the day-trading bot's) are left alone
+    positions = {p["symbol"]: float(p["market_value"]) for p in api("GET", "/positions") if p["symbol"] in universe}
     symbols = sorted(set(weights.index) | set(positions))
     orders = []
     for s in symbols:
@@ -86,7 +87,7 @@ def main():
     universe = chosen["universe"]
 
     weights, asof = target_weights(strategy, universe)
-    equity, positions, orders = plan_orders(weights)
+    equity, positions, orders = plan_orders(weights, universe)
     print(f"Strategy {strategy}, signals as of close {asof}, account equity ${equity:,.2f}")
     print("Target weights:", ", ".join(f"{s} {w*100:.1f}%" for s, w in weights.items()) or "all cash")
     print("Current positions:", ", ".join(f"{s} ${v:,.0f}" for s, v in positions.items()) or "none")

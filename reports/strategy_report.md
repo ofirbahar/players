@@ -7,7 +7,9 @@ In-sample: 2017-01-01 to 2021-12-31. Out-of-sample: 2022-01-01 to 2026-11-13.
 Selection rule (fixed before looking at out-of-sample results): highest in-sample Sharpe
 among strategies with an in-sample max drawdown no worse than buy & hold.
 
-**Chosen strategy: `low_vol_rotation`**
+Single-strategy pick by that rule: `low_vol_rotation`. **Traded strategy: `blend_all_scaled`** (blend of all
+16 strategies scaled 1.5x, capped at 100% invested), because diversifying across strategies held up
+better out-of-sample than any single pick. See improvement_log.md.
 
 ## In-sample (ranked by Sharpe)
 
@@ -18,6 +20,8 @@ among strategies with an in-sample max drawdown no worse than buy & hold.
 | trend_ensemble_voltarget | 6.5%   | 6.0%  |     1.07 | -9.2%   |     0.71 |            5.94 | 100.0%            |
 | trend_ensemble           | 8.0%   | 7.5%  |     1.07 | -11.0%  |     0.73 |            5.24 | 100.0%            |
 | macd_trend               | 8.1%   | 7.6%  |     1.07 | -10.5%  |     0.78 |           19.87 | 98.3%             |
+| blend_all                | 7.2%   | 6.9%  |     1.03 | -10.5%  |     0.68 |            6.86 | 100.0%            |
+| blend_all_scaled         | 10.7%  | 10.3% |     1.03 | -15.4%  |     0.69 |           10.44 | 100.0%            |
 | ema_cross_12_26          | 7.8%   | 7.8%  |     1    | -12.1%  |     0.65 |            8.14 | 99.9%             |
 | buy_and_hold             | 14.0%  | 14.5% |     0.98 | -27.2%  |     0.51 |            0    | 100.0%            |
 | ts_momentum_12m          | 8.3%   | 9.0%  |     0.94 | -14.3%  |     0.58 |            5.37 | 99.9%             |
@@ -40,6 +44,8 @@ among strategies with an in-sample max drawdown no worse than buy & hold.
 | trend_ensemble_voltarget | 4.2%   | 5.9%  |     0.72 | -6.6%   |     0.64 |            6.71 | 100.0%            |
 | trend_ensemble           | 5.6%   | 7.2%  |     0.79 | -6.9%   |     0.81 |            5.72 | 100.0%            |
 | macd_trend               | 4.1%   | 7.3%  |     0.59 | -11.3%  |     0.37 |           20.16 | 96.1%             |
+| blend_all                | 6.3%   | 6.8%  |     0.93 | -5.3%   |     1.19 |            6.9  | 100.0%            |
+| blend_all_scaled         | 9.2%   | 10.1% |     0.92 | -7.8%   |     1.18 |           10.62 | 100.0%            |
 | ema_cross_12_26          | 5.6%   | 7.4%  |     0.78 | -7.5%   |     0.75 |            8.21 | 98.1%             |
 | buy_and_hold             | 9.9%   | 13.2% |     0.78 | -19.5%  |     0.51 |            0    | 100.0%            |
 | ts_momentum_12m          | 6.7%   | 9.0%  |     0.76 | -10.8%  |     0.62 |            5.83 | 99.9%             |

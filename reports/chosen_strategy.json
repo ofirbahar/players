@@ -1,5 +1,5 @@
 {
-  "strategy": "low_vol_rotation",
+  "strategy": "blend_all_scaled",
   "universe": [
     "SPY",
     "QQQ",

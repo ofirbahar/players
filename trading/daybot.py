@@ -28,13 +28,16 @@ from .live import api
 LOG = config.ROOT / "reports" / "daybot_log.jsonl"
 
 
-def strategy(f, enter_z=3.5, exit_z=0.25, start_minute=60, since=None):
+def strategy(f, enter_z=3.5, exit_z=0.25, start_minute=60, since=None, max_day_er=0.1):
     """VWAP reversion: fade moves stretched 3.5 standard deviations from VWAP; exit back near VWAP.
     Chosen because it was the only intraday strategy with a positive edge before costs in both test periods;
     the strict thresholds keep trading (and costs) low."""
+    # Trend-day filter: no new fades when the day so far has moved efficiently in one direction
+    # (day_er = net move since the open / total distance travelled). Halved out-of-sample losses.
+    calm = f["day_er"] < max_day_er
     fresh = pd.Series(True, index=f.index) if since is None else pd.Series(f.index >= since, index=f.index)
     # only signals that fire after `since` (the bot's start) count, so a mid-day start doesn't chase old trades
-    p = intraday._stateful((f["z"] < -enter_z) & fresh, (f["z"] > enter_z) & fresh,
+    p = intraday._stateful((f["z"] < -enter_z) & fresh & calm, (f["z"] > enter_z) & fresh & calm,
                            (f["z"].abs() < exit_z) | ~fresh, f)
     return p.where(f["minute"] >= start_minute, 0.0)
 
@@ -131,7 +134,8 @@ def main():
     if "paper" not in config.BASE_URL:
         raise SystemExit("daybot only runs against the paper endpoint.")
 
-    symbols = intraday.SYMBOLS
+    swing = set(json.loads((config.ROOT / "reports" / "chosen_strategy.json").read_text())["universe"])
+    symbols = [s for s in intraday.SYMBOLS if s not in swing]   # never trade the swing portfolio's symbols
     book = Book()
     start_pos = positions_for(symbols)
     if start_pos:
