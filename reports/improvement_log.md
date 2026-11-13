@@ -37,3 +37,14 @@ Adopted, but still a loss out-of-sample: the bot is still not profitable after c
 
 The swing trader would have closed the day bot's positions, and both traded QQQ. The swing trader now
 only touches its own universe, and the bot skips any symbol in it.
+
+## 2026-11-13 · Rejected: a bigger universe (24 ETFs instead of 12)
+
+Added real estate, commodities, inflation-linked, corporate and high-yield bonds, more sectors, silver, Japan.
+Blend Sharpe fell in both periods (1.03 → 0.95 before 2022; 0.92 → 0.78 after) and the out-of-sample
+drawdown deepened (−7.8% → −10.0%). Many additions move with assets already held. Kept the 12.
+
+## 2026-11-13 · Added: live scorecard (`python -m trading.scorecard`)
+
+Compares the account's live results with the backtest's expectations and flags drift. Rule: when
+live results fall outside the normal range, cut size or stop; don't re-tune on the same data.
