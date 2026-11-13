@@ -1,0 +1,17 @@
+{
+  "strategy": "low_vol_rotation",
+  "universe": [
+    "SPY",
+    "QQQ",
+    "IWM",
+    "EFA",
+    "EEM",
+    "TLT",
+    "IEF",
+    "GLD",
+    "XLE",
+    "XLK",
+    "XLF",
+    "XLV"
+  ]
+}
