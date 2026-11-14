@@ -69,7 +69,7 @@ from the market's efficiency ratio. Results (May–Nov 2026, 2 bps per side for 
 
 `trading.daybot` trades the strictest VWAP-reversion setting live on the paper account: every
 minute it checks for a move 3.5 standard deviations away from VWAP (after 10:30am) and fades it,
-exiting near VWAP. $5,000 per stock, integer shares (so it can short), a $750 daily loss stop,
+exiting near VWAP. $1,000 per stock, integer shares (so it can short), a $150 daily loss stop,
 flat by 15:55 ET, paper endpoint only. Expect it to lose a little on average: it exists to watch
 live behaviour, not because it has a proven edge. Logs go to `reports/daybot_log.jsonl`.
 It must run on a machine that stays on through the trading day.

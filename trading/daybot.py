@@ -131,8 +131,9 @@ def flatten(symbols, book, dry, reason):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--size", type=float, default=5000.0, help="dollars per symbol")
-    ap.add_argument("--max-loss", type=float, default=750.0, help="stop for the day if bot P&L falls below -this")
+    ap.add_argument("--size", type=float, default=1000.0,
+                    help="dollars per symbol (kept small: the strategy loses after costs in backtests)")
+    ap.add_argument("--max-loss", type=float, default=150.0, help="stop for the day if bot P&L falls below -this")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
     if "paper" not in config.BASE_URL:

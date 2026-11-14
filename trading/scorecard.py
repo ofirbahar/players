@@ -56,6 +56,32 @@ def daybot_days():
     return pd.DataFrame(result).T
 
 
+GOAL_PER_DAY = 200.0
+EXPECTED_ANNUAL = 0.092          # swing blend, out-of-sample 2022 onward
+TRADING_DAYS = 252
+
+
+def goal_section(equity):
+    """How far the account is from averaging the daily goal, and how long reinvesting would take."""
+    need = GOAL_PER_DAY * TRADING_DAYS / EXPECTED_ANNUAL
+    now = equity * EXPECTED_ANNUAL / TRADING_DAYS
+    lines = ["", f"## Goal: average ${GOAL_PER_DAY:.0f} a day", "",
+             f"At ~{EXPECTED_ANNUAL*100:.1f}% a year the account is expected to average **${now:,.0f} a day** now "
+             f"({now/GOAL_PER_DAY*100:.0f}% of the goal).",
+             f"Averaging ${GOAL_PER_DAY:.0f} a day takes about **${need:,.0f}** invested. Individual days still swing both ways.",
+             "", "| Added each month | Years to reach it (gains reinvested) |", "|---|---|"]
+    monthly_r = (1 + EXPECTED_ANNUAL) ** (1 / 12) - 1
+    for add in [0, 500, 1000, 2000, 5000]:
+        eq, months = equity, 0
+        while eq < need and months < 1200:
+            eq = eq * (1 + monthly_r) + add
+            months += 1
+        lines.append(f"| ${add:,} | {months/12:.1f} |" if eq >= need else f"| ${add:,} | 100+ |")
+    lines.append("\nShortcuts like heavy leverage were simulated and rejected: 11x leverage averaged −$16 a day "
+                 "and wiped out the account (see improvement_log.md).")
+    return lines
+
+
 def main():
     eq = account_history()
     lines = ["# Live scorecard", ""]
@@ -76,6 +102,8 @@ def main():
             lines.append(f"Only {n} days of live data: too few to judge skill. Roughly 60+ are needed.")
     else:
         lines.append("Not enough account history yet.")
+    equity_now = float(api("GET", "/account")["equity"])
+    lines += goal_section(equity_now)
     dbt = daybot_days()
     if len(dbt):
         lines += ["", "## Day bot", "", "| Day | Orders | Bot P&L |", "|---|---|---|"]

@@ -60,3 +60,16 @@ says nothing about skill. Bugs found from the live run:
   which caused 1-share AAPL trades that only paid spread. It now holds a position until the signal changes.
 
 Swing portfolio rebalanced into `blend_all_scaled` at 3:57pm ET.
+
+## 2026-11-14 · Goal of $200 a day: leverage rejected, goal tracker added
+
+Simulated the scaled blend from 2017 with leverage, starting from $50,000:
+
+| Leverage | Avg per day | Days ≥ $200 | Losing days | Max drop | Ending equity |
+|---|---|---|---|---|---|
+| 1× (kept) | $31 | 34% | 44% | −15% | $127,000 |
+| 2× (Alpaca overnight max) | $53 | 45% | 45% | −33% | $181,000 |
+| 11× (needed for $200 avg) | −$16 | 46% | 45% | −99% | $12,600 (wiped out) |
+
+Kept 1×. The day bot is cut to $1,000 per stock with a $150 daily loss stop, since it loses after costs
+in testing. The scorecard now tracks progress toward averaging $200 a day.
