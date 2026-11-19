@@ -1,0 +1,6 @@
+.env
+data_cache/
+__pycache__/
+*.pyc
+reports/daybot_console.log
+reports/daybot_log.jsonl

@@ -1,0 +1,17 @@
+{
+  "strategy": "blend_all_scaled",
+  "universe": [
+    "SPY",
+    "QQQ",
+    "IWM",
+    "EFA",
+    "EEM",
+    "TLT",
+    "IEF",
+    "GLD",
+    "XLE",
+    "XLK",
+    "XLF",
+    "XLV"
+  ]
+}
